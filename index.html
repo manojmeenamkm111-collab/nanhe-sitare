@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#7657d5"><meta name="description" content="2 से 4 साल के बच्चों के लिए सुरक्षित, मजेदार हिंदी सीखने वाला गेम">
+<title>नन्हे सितारे 🌟</title>
+<style>
+:root{--ink:#34265f;--purple:#7657d5;--pink:#ff7ba8;--yellow:#ffd65a;--mint:#75d9bd;--sky:#7bc9f5}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Noto Sans Devanagari",sans-serif;color:var(--ink);background:linear-gradient(145deg,#fff4d8,#f6eaff 55%,#e7f7ff);min-height:100vh}
+button{font:inherit;touch-action:manipulation;border:0;cursor:pointer}
+.app{max-width:760px;margin:auto;padding:16px 16px 30px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px}.brand{display:flex;align-items:center;gap:10px}.logo{width:54px;height:54px;border-radius:18px;background:#fff;display:grid;place-items:center;font-size:32px;box-shadow:0 5px 0 #e4d6ff}
+h1{font-size:clamp(25px,6vw,36px);margin:0;color:#6947c6}.brand-owner{font-size:11px;font-weight:900;letter-spacing:3px;color:#e49b24;margin-bottom:1px}.tag{margin:2px 0 0;font-size:13px;color:#806f9e}.sound{background:white;border-radius:16px;padding:12px 15px;font-size:22px;box-shadow:0 4px 0 #e5daf7}
+.hero{margin:18px 0;background:linear-gradient(110deg,#7657d5,#a276ed);color:white;border-radius:28px;padding:22px;position:relative;overflow:hidden;box-shadow:0 8px 0 #d7c5ff}.hero h2{font-size:26px;margin:0 0 5px}.hero p{margin:0;opacity:.95}.hero .stars{font-size:42px;position:absolute;right:20px;bottom:12px}
+.stats{display:flex;gap:10px;margin:14px 0}.stat{flex:1;background:#fff;border-radius:17px;padding:10px;text-align:center;box-shadow:0 4px 0 #eadff8}.stat b{display:block;font-size:21px}.stat small{color:#8c7aa8}
+.section{font-size:20px;margin:22px 2px 12px}.games{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.game{min-height:142px;border-radius:23px;padding:16px;text-align:left;box-shadow:0 6px 0 rgba(60,40,100,.12);display:flex;flex-direction:column;justify-content:space-between;transition:transform .12s}.game:active,.choice:active{transform:scale(.97)}.game .emoji{font-size:42px}.game strong{font-size:18px}.game small{font-size:12px;opacity:.75}
+.c1{background:#ffe0e9}.c2{background:#dff4ff}.c3{background:#e4f7d9}.c4{background:#fff0c5}
+.footer{text-align:center;color:#8d7da4;font-size:12px;margin-top:22px}
+.panel{background:#fff;border-radius:28px;padding:20px;box-shadow:0 7px 0 #e6dcf4;margin-top:18px;text-align:center}
+.back{background:#f0eaff;color:#6748bd;border-radius:14px;padding:10px 14px;font-weight:700;float:left}
+.prompt{font-size:clamp(23px,5vw,30px);font-weight:800;margin:16px 0 8px}.hint{color:#88799e;margin:0 0 18px}
+.choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}.choice{min-height:125px;border-radius:22px;display:grid;place-items:center;font-size:52px;box-shadow:0 5px 0 rgba(0,0,0,.1);border:4px solid transparent}.choice span{font-size:16px;font-weight:800;color:#34265f}.choice.correct{border-color:#39bf91}
+.feedback{font-size:23px;font-weight:800;min-height:38px;margin:16px 0 4px;color:#2c9c77}.next{background:#7657d5;color:#fff;border-radius:17px;padding:14px 24px;font-weight:800;font-size:18px;margin-top:10px;box-shadow:0 5px 0 #5436aa}
+.shape{width:70px;height:70px;background:#ffbf45}.circle{border-radius:50%}.triangle{width:0;height:0;background:transparent;border-left:40px solid transparent;border-right:40px solid transparent;border-bottom:75px solid #ff789e}
+.parent{margin-top:20px;background:#fff9e7;border-radius:20px;padding:14px}.parent summary{font-weight:800;cursor:pointer}.parent p{font-size:13px;line-height:1.55;color:#766b82}
+@media(min-width:600px){.games{grid-template-columns:repeat(4,1fr)}.game{min-height:160px}}
+</style>
+
+<style>
+#splash{overflow:hidden!important;background:
+radial-gradient(ellipse at 50% 42%,rgba(145,104,255,.55),transparent 38%),
+radial-gradient(ellipse at 12% 12%,rgba(255,194,75,.18),transparent 28%),
+radial-gradient(ellipse at 88% 85%,rgba(255,94,171,.2),transparent 30%),
+linear-gradient(145deg,#090d35 0%,#21104f 48%,#35105e 100%)!important}
+#splash:before{content:"";position:absolute;inset:12px;border:1px solid rgba(255,221,130,.42);border-radius:34px;pointer-events:none;box-shadow:inset 0 0 35px rgba(255,255,255,.05),0 0 35px rgba(255,205,90,.12)}
+#splash:after{content:"✦       ·       ✧       ·       ✦       ·       ✧";position:absolute;top:12%;left:0;width:100%;text-align:center;color:#ffe28a;letter-spacing:12px;font-size:18px;opacity:.8;animation:twinkle 2s ease-in-out infinite alternate}
+#splash .intro-wrap{position:relative;z-index:1;width:min(100%,460px);padding:28px 18px 24px;animation:introRise 1s cubic-bezier(.2,.8,.2,1) both}
+#splash .production{display:inline-flex;align-items:center;gap:9px;padding:10px 17px;border:1px solid rgba(255,220,130,.7);border-radius:999px;background:linear-gradient(120deg,rgba(255,255,255,.13),rgba(255,255,255,.04));box-shadow:0 0 25px rgba(255,208,95,.13);font-size:12px;letter-spacing:3px;font-weight:900;color:#ffe8a6}
+#splash .production:before,#splash .production:after{content:"✦";color:#ffcf55;font-size:14px}
+#splash .presents{font-size:10px;letter-spacing:7px;color:#d9caff;margin:13px 0 5px 7px}
+#splash .mascot-stage{height:155px;display:grid;place-items:center;position:relative;margin:6px auto 0}
+#splash .halo{position:absolute;width:140px;height:140px;border:1px solid rgba(255,225,133,.55);border-radius:50%;box-shadow:0 0 28px rgba(255,206,79,.18),inset 0 0 24px rgba(255,255,255,.08);animation:haloPulse 2.8s ease-in-out infinite}
+#splash .halo:before,#splash .halo:after{content:"";position:absolute;border:1px solid rgba(255,255,255,.22);border-radius:50%;inset:12px}
+#splash .halo:after{inset:-12px;border-color:rgba(255,214,119,.18)}
+#splash .bigstar{font-size:104px;filter:drop-shadow(0 0 18px rgba(255,214,77,.7));animation:starFloat 2.5s ease-in-out infinite}
+#splash .brand-title{font-size:clamp(42px,11vw,64px);font-weight:1000;line-height:1.22;letter-spacing:-1px;background:linear-gradient(180deg,#fff9d8 5%,#ffd85b 48%,#ff9c37 95%);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-stroke:1px rgba(255,255,255,.55);filter:drop-shadow(0 5px 0 #4a237e) drop-shadow(0 0 18px rgba(255,202,73,.3)}
+#splash .tagline{display:inline-block;margin-top:15px;padding:10px 24px;border-radius:999px;background:linear-gradient(90deg,#f54da7,#9a4ee8,#5e6df4);border:2px solid rgba(255,255,255,.75);box-shadow:0 6px 0 #3c237e,0 0 22px rgba(233,106,255,.3);font-size:16px;font-weight:900;color:white;letter-spacing:1px}
+#splash .english{margin-top:27px;font-size:11px;letter-spacing:2px;color:#d9cfff}
+#splash .bottom-stars{margin-top:18px;color:#ffd76b;font-size:14px;letter-spacing:12px}
+@keyframes introRise{from{opacity:0;transform:translateY(22px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes starFloat{0%,100%{transform:translateY(0) rotate(-5deg)}50%{transform:translateY(-9px) rotate(5deg)}}
+@keyframes haloPulse{0%,100%{transform:scale(.96);opacity:.7}50%{transform:scale(1.06);opacity:1}}
+@keyframes twinkle{from{opacity:.35;transform:translateY(0)}to{opacity:.9;transform:translateY(5px)}}
+</style>
+
+</head>
+<body>
+<main class="app">
+<header class="top"><div class="brand"><div class="logo">🌟</div><div><div class="brand-owner">YASHVI’S</div><h1>नन्हे सितारे</h1><p class="tag">खेलो • सीखो • मुस्कुराओ</p></div></div><button class="sound" id="soundBtn" aria-label="आवाज़ चालू या बंद">🔊</button></header>
+<section id="splash" style="position:fixed;inset:0;z-index:10;color:#fff;display:flex;align-items:center;justify-content:center;text-align:center;padding:0;background:#170d43">
+<img src="/assets/yashvi-nanhe-sitare-splash.png" alt="A Yashvi Production Presents — नन्हे सितारे" style="width:100%;height:100%;object-fit:contain;max-width:720px;max-height:100vh;display:block"><div class="intro-wrap" style="display:none">
+  <div class="production">A YASHVI PRODUCTION</div>
+  <div class="presents">P R E S E N T S</div>
+  <div class="mascot-stage"><div class="halo"></div><div class="bigstar">🌟</div></div>
+  <div class="brand-title">नन्हे सितारे</div>
+  <div class="tagline">खेलो&nbsp; • &nbsp;सीखो&nbsp; • &nbsp;बढ़ो</div>
+  <div class="english">A LITTLE WORLD OF LEARNING &amp; HAPPINESS</div>
+  <div class="bottom-stars">✦ ✧ ✦ ✧ ✦</div>
+</div></section>
+<section id="home">
+<div class="hero"><h2>नमस्ते प्यारे बच्चे! 👋</h2><p>आओ, आज कुछ नया सीखें!</p><div class="stars">✨🌈</div></div>
+<div class="stats"><div class="stat"><b id="starCount">⭐ 0</b><small>मेरे सितारे</small></div><div class="stat"><b>😊</b><small>मुस्कुराते हुए सीखें</small></div></div>
+<h2 class="section">अपना खेल चुनो</h2>
+<div class="games">
+<button class="game c1" data-game="colors"><span class="emoji">🎨</span><strong>रंग पहचानो</strong><small>रंगों की दुनिया</small></button>
+<button class="game c2" data-game="animals"><span class="emoji">🐘</span><strong>जानवर पहचानो</strong><small>आवाज़ और पहचान</small></button>
+<button class="game c3" data-game="shapes"><span class="emoji">🔺</span><strong>आकार सीखो</strong><small>गोला, वर्ग, त्रिकोण</small></button>
+<button class="game c4" data-game="count"><span class="emoji">🍎</span><strong>गिनती सीखो</strong><small>एक से पाँच तक</small></button>
+</div>
+<details class="parent"><summary>👨‍👩‍👧 माता-पिता के लिए</summary><p>यह शुरुआती संस्करण बिना विज्ञापन और बिना चैट के बनाया गया है। बच्चे के साथ बैठकर खेलें और स्क्रीन टाइम सीमित रखें। अभी प्रोग्रेस इसी डिवाइस पर सेव होती है। ऑनलाइन अकाउंट/क्लाउड सेविंग जोड़ने के लिए सुरक्षित सर्वर सेटअप अलग से करना होगा।</p></details>
+<p class="footer">नन्हे सितारे • छोटे कदम, बड़ी सीख 💜</p>
+</section>
+<section id="play" hidden>
+<button class="back" id="backBtn">← वापस</button><div style="clear:both"></div>
+<div class="panel"><div id="levelEmoji" style="font-size:48px">🌈</div><div class="prompt" id="question">लाल रंग चुनो</div><p class="hint" id="hint">सही तस्वीर पर टैप करो</p><div class="choices" id="choices"></div><div class="feedback" id="feedback" aria-live="polite"></div><button class="next" id="nextBtn" hidden>अगला सवाल ➜</button></div>
+</section>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+let soundOn=true, stars=Number(localStorage.getItem('ns-stars')||0), current='', index=0, answered=false;
+$('starCount').textContent='⭐ '+stars;
+function speak(t){if(!soundOn||!('speechSynthesis'in window))return;speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(t);u.lang='hi-IN';u.rate=.82;u.pitch=1.12;speechSynthesis.speak(u)}
+$('soundBtn').onclick=()=>{soundOn=!soundOn;$('soundBtn').textContent=soundOn?'🔊':'🔇';if(!soundOn&&speechSynthesis)speechSynthesis.cancel();};
+const sets={
+colors:[
+{q:'लाल रंग चुनो',say:'लाल रंग चुनो',a:'लाल',opts:[['🔴','लाल'],['🔵','नीला'],['🟡','पीला'],['🟢','हरा']],correct:'लाल'},
+{q:'पीला रंग चुनो',say:'पीला रंग चुनो',a:'पीला',opts:[['🟡','पीला'],['🟣','बैंगनी'],['🔴','लाल'],['🟢','हरा']],correct:'पीला'},
+{q:'नीला रंग चुनो',say:'नीला रंग चुनो',opts:[['🔵','नीला'],['🟠','नारंगी'],['🟡','पीला'],['🔴','लाल']],correct:'नीला'}],
+animals:[
+{q:'हाथी कहाँ है?',say:'हाथी कहाँ है?',opts:[['🐘','हाथी'],['🐱','बिल्ली'],['🐶','कुत्ता'],['🦁','शेर']],correct:'हाथी'},
+{q:'म्याऊँ कौन करता है?',say:'म्याऊँ कौन करता है?',opts:[['🐱','बिल्ली'],['🐮','गाय'],['🐘','हाथी'],['🐸','मेंढक']],correct:'बिल्ली'},
+{q:'शेर कहाँ है?',say:'शेर कहाँ है?',opts:[['🦁','शेर'],['🐰','खरगोश'],['🐼','पांडा'],['🐶','कुत्ता']],correct:'शेर'}],
+shapes:[
+{q:'गोला कौन-सा है?',say:'गोला कौन सा है?',opts:[['🔴','गोला'],['🟦','वर्ग'],['🔺','त्रिकोण'],['⭐','तारा']],correct:'गोला'},
+{q:'त्रिकोण चुनो',say:'त्रिकोण चुनो',opts:[['🔺','त्रिकोण'],['🟡','गोला'],['🟩','वर्ग'],['⭐','तारा']],correct:'त्रिकोण'},
+{q:'तारा कहाँ है?',say:'तारा कहाँ है?',opts:[['⭐','तारा'],['🔵','गोला'],['🟥','वर्ग'],['🔺','त्रिकोण']],correct:'तारा'}],
+count:[
+{q:'एक सेब चुनो',say:'एक सेब चुनो',opts:[['🍎','🍎'],['🍎🍎','🍎🍎'],['🍎🍎🍎','🍎🍎🍎'],['🍎🍎🍎🍎','🍎🍎🍎🍎']],correct:'🍎'},
+{q:'दो सेब चुनो',say:'दो सेब चुनो',opts:[['🍎','🍎'],['🍎🍎','🍎🍎'],['🍎🍎🍎','🍎🍎🍎'],['🍎🍎🍎🍎','🍎🍎🍎🍎']],correct:'🍎🍎'},
+{q:'तीन सेब चुनो',say:'तीन सेब चुनो',opts:[['🍎🍎🍎','🍎🍎🍎'],['🍎','🍎'],['🍎🍎','🍎🍎'],['🍎🍎🍎🍎','🍎🍎🍎🍎']],correct:'🍎🍎🍎'}]
+};
+function start(game){current=game;index=0;$('home').hidden=true;$('play').hidden=false;render();window.scrollTo(0,0)}
+function render(){let item=sets[current][index];answered=false;$('feedback').textContent='';$('nextBtn').hidden=true;$('levelEmoji').textContent=({colors:'🎨',animals:'🐾',shapes:'🔺',count:'🍎'})[current];$('question').textContent=item.q;$('hint').textContent='सही तस्वीर पर टैप करो';$('choices').innerHTML='';
+let shuffled=[...item.opts].sort(()=>Math.random()-.5);
+shuffled.forEach(([emoji,label])=>{let b=document.createElement('button');b.className='choice';b.innerHTML=`<div>${emoji}</div><span>${label.length>8?'':label}</span>`;b.onclick=()=>choose(b,label,item.correct,item.say);$('choices').appendChild(b)});
+speak(item.say);
+}
+function choose(btn,label,correct,say){if(answered)return;answered=true;if(label===correct){btn.classList.add('correct');$('feedback').textContent='शाबाश! बहुत अच्छा! ⭐';stars++;localStorage.setItem('ns-stars',stars);$('starCount').textContent='⭐ '+stars;speak('शाबाश! बहुत अच्छा! एक सितारा तुम्हारा!');}else{$('feedback').textContent='कोई बात नहीं, फिर कोशिश करो!';speak('कोई बात नहीं। फिर कोशिश करो।');answered=false;return;}$('nextBtn').hidden=false;}
+$('nextBtn').onclick=()=>{index++;if(index>=sets[current].length){$('question').textContent='वाह! तुमने खेल पूरा किया!';$('levelEmoji').textContent='🏆';$('choices').innerHTML='<div style="grid-column:1/-1;font-size:70px">🎉🌟🎉</div>';$('feedback').textContent='तुम बहुत होशियार हो!';$('nextBtn').textContent='फिर से खेलें';$('nextBtn').onclick=()=>{index=0;$('nextBtn').textContent='अगला सवाल ➜';$('nextBtn').onclick=nextQuestion;render()};speak('वाह! तुमने खेल पूरा किया!');}else render();};
+function nextQuestion(){index++;render();}
+$('backBtn').onclick=()=>{$('play').hidden=true;$('home').hidden=false;speechSynthesis?.cancel();};
+document.querySelectorAll('[data-game]').forEach(b=>b.onclick=()=>start(b.dataset.game));
+setTimeout(()=>{ $('splash').style.display='none'; speak('नमस्ते प्यारे बच्चे! आओ खेलें और सीखें!'); },2600);
+</script>
+</body></html>
