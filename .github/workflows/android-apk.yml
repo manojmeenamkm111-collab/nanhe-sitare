@@ -7,12 +7,8 @@ on:
     branches:
       - main
 
-permissions:
-  contents: read
-
 jobs:
   build:
-    name: Build Android App
     runs-on: ubuntu-latest
 
     steps:
@@ -33,17 +29,20 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Install Capacitor Assets
+        run: npm install --save-dev @capacitor/assets
+
       - name: Build web app
         run: npm run build
 
       - name: Add Android platform
         run: npx cap add android
 
-      - name: Sync Capacitor
-        run: npx cap sync android
-
-      - name: Generate App Icon and Splash
+      - name: Generate App Icon and Splash Screen
         run: npx capacitor-assets generate --android
+
+      - name: Sync Android
+        run: npx cap sync android
 
       - name: Build APK
         run: |
