@@ -7,8 +7,12 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+
 jobs:
   build:
+    name: Build Android App
     runs-on: ubuntu-latest
 
     steps:
@@ -35,8 +39,11 @@ jobs:
       - name: Add Android platform
         run: npx cap add android
 
-      - name: Sync Android
+      - name: Sync Capacitor
         run: npx cap sync android
+
+      - name: Generate App Icon and Splash
+        run: npx capacitor-assets generate --android
 
       - name: Build APK
         run: |
