@@ -59,7 +59,7 @@ linear-gradient(145deg,#090d35 0%,#21104f 48%,#35105e 100%)!important}
 <main class="app">
 <header class="top"><div class="brand"><div class="logo">🌟</div><div><div class="brand-owner">YASHVI’S</div><h1>नन्हे सितारे</h1><p class="tag">खेलो • सीखो • मुस्कुराओ</p></div></div><button class="sound" id="soundBtn" aria-label="आवाज़ चालू या बंद">🔊</button></header>
 <section id="splash" style="position:fixed;inset:0;z-index:10;color:#fff;display:flex;align-items:center;justify-content:center;text-align:center;padding:0;background:#170d43">
-<img src="/assets/yashvi-nanhe-sitare-splash.png" alt="A Yashvi Production Presents — नन्हे सितारे" style="width:100%;height:100%;object-fit:contain;max-width:720px;max-height:100vh;display:block"><div class="intro-wrap" style="display:none">
+<img src="./assets/yashvi-nanhe-sitare-splash.png" alt="A Yashvi Production Presents — नन्हे सितारे" style="width:100%;height:100%;object-fit:contain;max-width:720px;max-height:100vh;display:block"><div class="intro-wrap" style="display:none">
   <div class="production">A YASHVI PRODUCTION</div>
   <div class="presents">P R E S E N T S</div>
   <div class="mascot-stage"><div class="halo"></div><div class="bigstar">🌟</div></div>
@@ -88,10 +88,15 @@ linear-gradient(145deg,#090d35 0%,#21104f 48%,#35105e 100%)!important}
 </main>
 <script>
 const $=id=>document.getElementById(id);
-let soundOn=true, stars=Number(localStorage.getItem('ns-stars')||0), current='', index=0, answered=false;
+let soundOn=true, audioReady=false, stars=Number(localStorage.getItem('ns-stars')||0), current='', index=0, answered=false;
+const audioFiles={bg:'./audio/01_background_music_loop.wav',correct:'./audio/02_correct_answer.wav',wrong:'./audio/03_try_again.wav',click:'./audio/04_button_click.wav',complete:'./audio/05_level_complete.wav',star:'./audio/06_star_reward.wav'};
+const audioPlayers={};
+function playSound(name,loop=false){if(!soundOn)return;try{let a=audioPlayers[name];if(!a){a=new Audio(audioFiles[name]);audioPlayers[name]=a;}a.pause();a.currentTime=0;a.loop=loop;a.volume=name==='bg'?0.22:0.85;let pr=a.play();if(pr&&pr.catch)pr.catch(()=>{});}catch(e){}}
+function startAudio(){if(audioReady)return;audioReady=true;playSound('bg',true);}
 $('starCount').textContent='⭐ '+stars;
-function speak(t){if(!soundOn||!('speechSynthesis'in window))return;speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(t);u.lang='hi-IN';u.rate=.82;u.pitch=1.12;speechSynthesis.speak(u)}
-$('soundBtn').onclick=()=>{soundOn=!soundOn;$('soundBtn').textContent=soundOn?'🔊':'🔇';if(!soundOn&&speechSynthesis)speechSynthesis.cancel();};
+function speak(t){if(!soundOn||!('speechSynthesis'in window))return;try{speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(t);u.lang='hi-IN';u.rate=.82;u.pitch=1.12;speechSynthesis.speak(u);}catch(e){}}
+$('soundBtn').onclick=()=>{startAudio();soundOn=!soundOn;$('soundBtn').textContent=soundOn?'🔊':'🔇';if(!soundOn){Object.values(audioPlayers).forEach(a=>a.pause());if('speechSynthesis'in window)speechSynthesis.cancel();}else{playSound('bg',true);speak('आवाज़ चालू हो गई है');}};
+document.addEventListener('pointerdown',startAudio,{once:true});
 const sets={
 colors:[
 {q:'लाल रंग चुनो',say:'लाल रंग चुनो',a:'लाल',opts:[['🔴','लाल'],['🔵','नीला'],['🟡','पीला'],['🟢','हरा']],correct:'लाल'},
@@ -110,17 +115,18 @@ count:[
 {q:'दो सेब चुनो',say:'दो सेब चुनो',opts:[['🍎','🍎'],['🍎🍎','🍎🍎'],['🍎🍎🍎','🍎🍎🍎'],['🍎🍎🍎🍎','🍎🍎🍎🍎']],correct:'🍎🍎'},
 {q:'तीन सेब चुनो',say:'तीन सेब चुनो',opts:[['🍎🍎🍎','🍎🍎🍎'],['🍎','🍎'],['🍎🍎','🍎🍎'],['🍎🍎🍎🍎','🍎🍎🍎🍎']],correct:'🍎🍎🍎'}]
 };
-function start(game){current=game;index=0;$('home').hidden=true;$('play').hidden=false;render();window.scrollTo(0,0)}
+function start(game){startAudio();playSound('click');current=game;index=0;$('home').hidden=true;$('play').hidden=false;render();window.scrollTo(0,0)}
 function render(){let item=sets[current][index];answered=false;$('feedback').textContent='';$('nextBtn').hidden=true;$('levelEmoji').textContent=({colors:'🎨',animals:'🐾',shapes:'🔺',count:'🍎'})[current];$('question').textContent=item.q;$('hint').textContent='सही तस्वीर पर टैप करो';$('choices').innerHTML='';
 let shuffled=[...item.opts].sort(()=>Math.random()-.5);
 shuffled.forEach(([emoji,label])=>{let b=document.createElement('button');b.className='choice';b.innerHTML=`<div>${emoji}</div><span>${label.length>8?'':label}</span>`;b.onclick=()=>choose(b,label,item.correct,item.say);$('choices').appendChild(b)});
-speak(item.say);
+playSound('click');speak(item.say);
 }
-function choose(btn,label,correct,say){if(answered)return;answered=true;if(label===correct){btn.classList.add('correct');$('feedback').textContent='शाबाश! बहुत अच्छा! ⭐';stars++;localStorage.setItem('ns-stars',stars);$('starCount').textContent='⭐ '+stars;speak('शाबाश! बहुत अच्छा! एक सितारा तुम्हारा!');}else{$('feedback').textContent='कोई बात नहीं, फिर कोशिश करो!';speak('कोई बात नहीं। फिर कोशिश करो।');answered=false;return;}$('nextBtn').hidden=false;}
-$('nextBtn').onclick=()=>{index++;if(index>=sets[current].length){$('question').textContent='वाह! तुमने खेल पूरा किया!';$('levelEmoji').textContent='🏆';$('choices').innerHTML='<div style="grid-column:1/-1;font-size:70px">🎉🌟🎉</div>';$('feedback').textContent='तुम बहुत होशियार हो!';$('nextBtn').textContent='फिर से खेलें';$('nextBtn').onclick=()=>{index=0;$('nextBtn').textContent='अगला सवाल ➜';$('nextBtn').onclick=nextQuestion;render()};speak('वाह! तुमने खेल पूरा किया!');}else render();};
+function choose(btn,label,correct,say){startAudio();playSound('click');if(answered)return;answered=true;if(label===correct){playSound('correct');playSound('star');btn.classList.add('correct');$('feedback').textContent='शाबाश! बहुत अच्छा! ⭐';stars++;localStorage.setItem('ns-stars',stars);$('starCount').textContent='⭐ '+stars;speak('शाबाश! बहुत अच्छा! एक सितारा तुम्हारा!');}else{playSound('wrong');$('feedback').textContent='कोई बात नहीं, फिर कोशिश करो!';speak('कोई बात नहीं। फिर कोशिश करो।');answered=false;return;}$('nextBtn').hidden=false;}
+$('nextBtn').onclick=()=>{startAudio();playSound('click');index++;if(index>=sets[current].length){playSound('complete');$('question').textContent='वाह! तुमने खेल पूरा किया!';$('levelEmoji').textContent='🏆';$('choices').innerHTML='<div style="grid-column:1/-1;font-size:70px">🎉🌟🎉</div>';$('feedback').textContent='तुम बहुत होशियार हो!';$('nextBtn').textContent='फिर से खेलें';$('nextBtn').onclick=()=>{index=0;$('nextBtn').textContent='अगला सवाल ➜';$('nextBtn').onclick=nextQuestion;render()};speak('वाह! तुमने खेल पूरा किया!');}else render();};
 function nextQuestion(){index++;render();}
-$('backBtn').onclick=()=>{$('play').hidden=true;$('home').hidden=false;speechSynthesis?.cancel();};
+$('backBtn').onclick=()=>{playSound('click');$('play').hidden=true;$('home').hidden=false;if('speechSynthesis'in window)speechSynthesis.cancel();};
 document.querySelectorAll('[data-game]').forEach(b=>b.onclick=()=>start(b.dataset.game));
-setTimeout(()=>{ $('splash').style.display='none'; speak('नमस्ते प्यारे बच्चे! आओ खेलें और सीखें!'); },2600);
+document.querySelectorAll('button').forEach(b=>{if(!b.dataset.game&&b.id!=='soundBtn'&&b.id!=='backBtn'&&b.id!=='nextBtn')b.addEventListener('click',()=>playSound('click'));});
+setTimeout(()=>{ $('splash').style.display='none'; },2600);
 </script>
 </body></html>
