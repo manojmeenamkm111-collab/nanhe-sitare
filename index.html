@@ -59,7 +59,7 @@ linear-gradient(145deg,#090d35 0%,#21104f 48%,#35105e 100%)!important}
 <main class="app">
 <header class="top"><div class="brand"><div class="logo">🌟</div><div><div class="brand-owner">YASHVI’S</div><h1>नन्हे सितारे</h1><p class="tag">खेलो • सीखो • मुस्कुराओ</p></div></div><button class="sound" id="soundBtn" aria-label="आवाज़ चालू या बंद">🔊</button></header>
 <section id="splash" style="position:fixed;inset:0;z-index:10;color:#fff;display:flex;align-items:center;justify-content:center;text-align:center;padding:0;background:#170d43">
-<img src="./assets/yashvi-nanhe-sitare-splash.png" alt="A Yashvi Production Presents — नन्हे सितारे" style="width:100%;height:100%;object-fit:contain;max-width:720px;max-height:100vh;display:block"><div class="intro-wrap" style="display:none">
+<div class="intro-wrap">
   <div class="production">A YASHVI PRODUCTION</div>
   <div class="presents">P R E S E N T S</div>
   <div class="mascot-stage"><div class="halo"></div><div class="bigstar">🌟</div></div>
@@ -86,16 +86,101 @@ linear-gradient(145deg,#090d35 0%,#21104f 48%,#35105e 100%)!important}
 <div class="panel"><div id="levelEmoji" style="font-size:48px">🌈</div><div class="prompt" id="question">लाल रंग चुनो</div><p class="hint" id="hint">सही तस्वीर पर टैप करो</p><div class="choices" id="choices"></div><div class="feedback" id="feedback" aria-live="polite"></div><button class="next" id="nextBtn" hidden>अगला सवाल ➜</button></div>
 </section>
 </main>
-<script>
+<script type="module">
+import { TextToSpeech } from '@capacitor-community/text-to-speech';
+
 const $=id=>document.getElementById(id);
 let soundOn=true, audioReady=false, stars=Number(localStorage.getItem('ns-stars')||0), current='', index=0, answered=false;
-const audioFiles={bg:'./audio/01_background_music_loop.wav',correct:'./audio/02_correct_answer.wav',wrong:'./audio/03_try_again.wav',click:'./audio/04_button_click.wav',complete:'./audio/05_level_complete.wav',star:'./audio/06_star_reward.wav'};
-const audioPlayers={};
-function playSound(name,loop=false){if(!soundOn)return;try{let a=audioPlayers[name];if(!a){a=new Audio(audioFiles[name]);audioPlayers[name]=a;}a.pause();a.currentTime=0;a.loop=loop;a.volume=name==='bg'?0.22:0.85;let pr=a.play();if(pr&&pr.catch)pr.catch(()=>{});}catch(e){}}
-function startAudio(){if(audioReady)return;audioReady=true;playSound('bg',true);}
+// Self-contained sound engine: no external WAV folder required.
+let audioCtx=null, masterGain=null, bgOsc=null, bgGain=null;
+function startAudio(){
+  try{
+    const AC=window.AudioContext||window.webkitAudioContext;
+    if(!AC)return;
+    if(!audioCtx){audioCtx=new AC();masterGain=audioCtx.createGain();masterGain.gain.value=soundOn?0.7:0;masterGain.connect(audioCtx.destination);}
+    if(audioCtx.state==='suspended')audioCtx.resume();
+    audioReady=true;
+    if(soundOn&&!bgOsc){
+      bgOsc=audioCtx.createOscillator();bgGain=audioCtx.createGain();
+      bgOsc.type='sine';bgOsc.frequency.value=196;bgGain.gain.value=0.012;
+      bgOsc.connect(bgGain);bgGain.connect(masterGain);bgOsc.start();
+    }
+  }catch(e){}
+}
+function tone(freq,duration=0.12,type='sine',delay=0){
+  if(!soundOn||!audioCtx||!masterGain)return;
+  try{const o=audioCtx.createOscillator(),g=audioCtx.createGain(),t=audioCtx.currentTime+delay;
+    o.type=type;o.frequency.setValueAtTime(freq,t);g.gain.setValueAtTime(0.0001,t);
+    g.gain.exponentialRampToValueAtTime(0.12,t+0.015);g.gain.exponentialRampToValueAtTime(0.0001,t+duration);
+    o.connect(g);g.connect(masterGain);o.start(t);o.stop(t+duration+0.03);
+  }catch(e){}
+}
+function playSound(name){
+  if(!soundOn)return;startAudio();
+  const patterns={click:[[520,.055]],correct:[[660,.11],[880,.16]],wrong:[[240,.18]],complete:[[523,.12],[659,.12],[784,.22]],star:[[880,.08],[1175,.14]]};
+  (patterns[name]||[]).forEach((n,i)=>tone(n[0],n[1],'sine',i*.12));
+}
 $('starCount').textContent='⭐ '+stars;
-function speak(t){if(!soundOn||!('speechSynthesis'in window))return;try{speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(t);u.lang='hi-IN';u.rate=.82;u.pitch=1.12;speechSynthesis.speak(u);}catch(e){}}
-$('soundBtn').onclick=()=>{startAudio();soundOn=!soundOn;$('soundBtn').textContent=soundOn?'🔊':'🔇';if(!soundOn){Object.values(audioPlayers).forEach(a=>a.pause());if('speechSynthesis'in window)speechSynthesis.cancel();}else{playSound('bg',true);speak('आवाज़ चालू हो गई है');}};
+let speechRun=0, voiceTurn=0;
+const nativeTTS=!!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+async function speak(t){
+  if(!soundOn||!t)return;
+  const run=++speechRun;
+  try{
+    if(nativeTTS){
+      try{await TextToSpeech.stop();}catch(e){}
+      if(run!==speechRun||!soundOn)return;
+      // Alternate two gentle pitch styles. Actual voice gender depends on
+      // the Hindi voices installed on the Android device.
+      voiceTurn++;
+      await TextToSpeech.speak({
+        text:String(t),
+        lang:'hi-IN',
+        rate:0.82,
+        pitch:voiceTurn%2===0?1.18:1.38,
+        volume:1
+      });
+      return;
+    }
+    if('speechSynthesis'in window){
+      speechSynthesis.cancel();
+      const u=new SpeechSynthesisUtterance(String(t));u.lang='hi-IN';u.rate=.82;u.pitch=voiceTurn++%2===0?1.18:1.38;u.volume=1;
+      const voices=speechSynthesis.getVoices();
+      const hindi=voices.find(v=>/^hi(-|_)?IN$/i.test(v.lang))||voices.find(v=>/^hi/i.test(v.lang));
+      if(hindi)u.voice=hindi;
+      speechSynthesis.speak(u);
+    }
+  }catch(e){
+    console.warn('Hindi speech unavailable:',e);
+    try{
+      if('speechSynthesis'in window){
+        speechSynthesis.cancel();
+        const u=new SpeechSynthesisUtterance(String(t));u.lang='hi-IN';u.rate=.82;u.pitch=1.2;
+        speechSynthesis.speak(u);
+      }
+    }catch(e2){}
+  }
+}
+async function speakQuestion(item){
+  if(!soundOn)return;
+  await speak(item.say||item.q);
+  if(!soundOn)return;
+  for(let i=0;i<item.opts.length;i++){
+    const label=item.opts[i][1];
+    if(label && !/^🍎+$/.test(label)){
+      await speak('विकल्प '+(i+1)+'। '+label);
+    } else if(label){
+      const count=[...label].length;
+      const word=count===1?'एक सेब':count===2?'दो सेब':count===3?'तीन सेब':'चार सेब';
+      await speak('विकल्प '+(i+1)+'। '+word);
+    }
+  }
+}
+$('soundBtn').onclick=()=>{
+  soundOn=!soundOn;$('soundBtn').textContent=soundOn?'🔊':'🔇';
+  if(!soundOn){if(masterGain&&audioCtx)masterGain.gain.setTargetAtTime(0,audioCtx.currentTime,.04);if('speechSynthesis'in window)speechSynthesis.cancel();if(nativeTTS)TextToSpeech.stop().catch(()=>{});}
+  else{startAudio();if(masterGain)masterGain.gain.setTargetAtTime(.7,audioCtx.currentTime,.04);speak('आवाज़ चालू हो गई है');}
+};
 document.addEventListener('pointerdown',startAudio,{once:true});
 const sets={
 colors:[
@@ -116,14 +201,43 @@ count:[
 {q:'तीन सेब चुनो',say:'तीन सेब चुनो',opts:[['🍎🍎🍎','🍎🍎🍎'],['🍎','🍎'],['🍎🍎','🍎🍎'],['🍎🍎🍎🍎','🍎🍎🍎🍎']],correct:'🍎🍎🍎'}]
 };
 function start(game){startAudio();playSound('click');current=game;index=0;$('home').hidden=true;$('play').hidden=false;render();window.scrollTo(0,0)}
-function render(){let item=sets[current][index];answered=false;$('feedback').textContent='';$('nextBtn').hidden=true;$('levelEmoji').textContent=({colors:'🎨',animals:'🐾',shapes:'🔺',count:'🍎'})[current];$('question').textContent=item.q;$('hint').textContent='सही तस्वीर पर टैप करो';$('choices').innerHTML='';
-let shuffled=[...item.opts].sort(()=>Math.random()-.5);
-shuffled.forEach(([emoji,label])=>{let b=document.createElement('button');b.className='choice';b.innerHTML=`<div>${emoji}</div><span>${label.length>8?'':label}</span>`;b.onclick=()=>choose(b,label,item.correct,item.say);$('choices').appendChild(b)});
-playSound('click');speak(item.say);
+function render(){
+  const item=sets[current][index];answered=false;
+  $('feedback').textContent='';$('nextBtn').hidden=true;$('nextBtn').textContent='अगला सवाल ➜';
+  $('levelEmoji').textContent=({colors:'🎨',animals:'🐾',shapes:'🔺',count:'🍎'})[current];
+  $('question').textContent=item.q;$('hint').textContent='सही तस्वीर पर टैप करो';$('choices').innerHTML='';
+  const shuffled=[...item.opts].sort(()=>Math.random()-.5);
+  shuffled.forEach(([emoji,label])=>{
+    const b=document.createElement('button');b.className='choice';
+    b.innerHTML=`<div>${emoji}</div><span>${label.length>8?'':label}</span>`;
+    b.onclick=()=>choose(b,label,item.correct,item.say);$('choices').appendChild(b);
+  });
+  playSound('click');
+  // Speak only once, after the new question is painted.
+  speakQuestion(item);
 }
-function choose(btn,label,correct,say){startAudio();playSound('click');if(answered)return;answered=true;if(label===correct){playSound('correct');playSound('star');btn.classList.add('correct');$('feedback').textContent='शाबाश! बहुत अच्छा! ⭐';stars++;localStorage.setItem('ns-stars',stars);$('starCount').textContent='⭐ '+stars;speak('शाबाश! बहुत अच्छा! एक सितारा तुम्हारा!');}else{playSound('wrong');$('feedback').textContent='कोई बात नहीं, फिर कोशिश करो!';speak('कोई बात नहीं। फिर कोशिश करो।');answered=false;return;}$('nextBtn').hidden=false;}
-$('nextBtn').onclick=()=>{startAudio();playSound('click');index++;if(index>=sets[current].length){playSound('complete');$('question').textContent='वाह! तुमने खेल पूरा किया!';$('levelEmoji').textContent='🏆';$('choices').innerHTML='<div style="grid-column:1/-1;font-size:70px">🎉🌟🎉</div>';$('feedback').textContent='तुम बहुत होशियार हो!';$('nextBtn').textContent='फिर से खेलें';$('nextBtn').onclick=()=>{index=0;$('nextBtn').textContent='अगला सवाल ➜';$('nextBtn').onclick=nextQuestion;render()};speak('वाह! तुमने खेल पूरा किया!');}else render();};
-function nextQuestion(){index++;render();}
+function choose(btn,label,correct,say){
+  startAudio();if(answered)return;playSound('click');
+  if(label===correct){
+    answered=true;playSound('correct');playSound('star');btn.classList.add('correct');
+    $('feedback').textContent='शाबाश! बहुत अच्छा! ⭐';stars++;
+    localStorage.setItem('ns-stars',stars);$('starCount').textContent='⭐ '+stars;
+    speak('शाबाश! बहुत अच्छा! एक सितारा तुम्हारा!');$('nextBtn').hidden=false;
+  }else{
+    playSound('wrong');$('feedback').textContent='कोई बात नहीं, फिर कोशिश करो!';
+    speak('कोई बात नहीं। फिर कोशिश करो।');
+  }
+}
+$('nextBtn').onclick=()=>{
+  startAudio();playSound('click');
+  if(index<sets[current].length-1){index++;render();return;}
+  playSound('complete');$('question').textContent='वाह! तुमने खेल पूरा किया!';
+  $('levelEmoji').textContent='🏆';$('choices').innerHTML='<div style="grid-column:1/-1;font-size:70px">🎉🌟🎉</div>';
+  $('feedback').textContent='तुम बहुत होशियार हो!';$('nextBtn').textContent='फिर से खेलें';
+  $('nextBtn').onclick=()=>{index=0;$('nextBtn').onclick=nextQuestion;render();};
+  speak('वाह! तुमने खेल पूरा किया!');
+};
+function nextQuestion(){index=0;render();}
 $('backBtn').onclick=()=>{playSound('click');$('play').hidden=true;$('home').hidden=false;if('speechSynthesis'in window)speechSynthesis.cancel();};
 document.querySelectorAll('[data-game]').forEach(b=>b.onclick=()=>start(b.dataset.game));
 document.querySelectorAll('button').forEach(b=>{if(!b.dataset.game&&b.id!=='soundBtn'&&b.id!=='backBtn'&&b.id!=='nextBtn')b.addEventListener('click',()=>playSound('click'));});
